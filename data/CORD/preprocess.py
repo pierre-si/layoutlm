@@ -88,65 +88,33 @@ def convert(args):
                             + "\n"
                         )
                 else:
-                    if len(words) == 1:
-                        fw.write(words[0]["text"] + "\tS-" + label.upper() + "\n")
+                    fw.write(words[0]["text"] + "\tB-" + label.upper() + "\n")
+                    fbw.write(
+                        words[0]["text"]
+                        + "\t"
+                        + bbox_string(words[0]["quad"], width, length)
+                        + "\n"
+                    )
+                    fiw.write(
+                        words[0]["text"]
+                        + "\t"
+                        + actual_bbox_string(words[0]["quad"], width, length)
+                        + "\t"
+                        + file_name
+                        + "\n"
+                    )
+                    for w in words[1:]:
+                        fw.write(w["text"] + "\tI-" + label.upper() + "\n")
                         fbw.write(
-                            words[0]["text"]
+                            w["text"]
                             + "\t"
-                            + bbox_string(words[0]["quad"], width, length)
+                            + bbox_string(w["quad"], width, length)
                             + "\n"
                         )
                         fiw.write(
-                            words[0]["text"]
+                            w["text"]
                             + "\t"
-                            + actual_bbox_string(words[0]["quad"], width, length)
-                            + "\t"
-                            + file_name
-                            + "\n"
-                        )
-                    else:
-                        fw.write(words[0]["text"] + "\tB-" + label.upper() + "\n")
-                        fbw.write(
-                            words[0]["text"]
-                            + "\t"
-                            + bbox_string(words[0]["quad"], width, length)
-                            + "\n"
-                        )
-                        fiw.write(
-                            words[0]["text"]
-                            + "\t"
-                            + actual_bbox_string(words[0]["quad"], width, length)
-                            + "\t"
-                            + file_name
-                            + "\n"
-                        )
-                        for w in words[1:-1]:
-                            fw.write(w["text"] + "\tI-" + label.upper() + "\n")
-                            fbw.write(
-                                w["text"]
-                                + "\t"
-                                + bbox_string(w["quad"], width, length)
-                                + "\n"
-                            )
-                            fiw.write(
-                                w["text"]
-                                + "\t"
-                                + actual_bbox_string(w["quad"], width, length)
-                                + "\t"
-                                + file_name
-                                + "\n"
-                            )
-                        fw.write(words[-1]["text"] + "\tE-" + label.upper() + "\n")
-                        fbw.write(
-                            words[-1]["text"]
-                            + "\t"
-                            + bbox_string(words[-1]["quad"], width, length)
-                            + "\n"
-                        )
-                        fiw.write(
-                            words[-1]["text"]
-                            + "\t"
-                            + actual_bbox_string(words[-1]["quad"], width, length)
+                            + actual_bbox_string(w["quad"], width, length)
                             + "\t"
                             + file_name
                             + "\n"
