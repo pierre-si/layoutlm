@@ -5,28 +5,30 @@ import os
 from PIL import Image
 from transformers import AutoTokenizer
 
+# script from microsoft/unilm with modifications to adapt it to the CORD dataset.
 
-def bbox_string(box, width, length):
+# should take the min of (x1, x4), the min of (y1, y2), the max of (x3, x2), the max of (y3, y4) 
+def bbox_string(quad, width, length):
     return (
-        str(int(1000 * (box[0] / width)))
+        str(int(1000 * (quad["x1"] / width)))
         + " "
-        + str(int(1000 * (box[1] / length)))
+        + str(int(1000 * (quad["y1"] / length)))
         + " "
-        + str(int(1000 * (box[2] / width)))
+        + str(int(1000 * (quad["x3"] / width)))
         + " "
-        + str(int(1000 * (box[3] / length)))
+        + str(int(1000 * (quad["y3"] / length)))
     )
 
 
-def actual_bbox_string(box, width, length):
+def actual_bbox_string(quad, width, length):
     return (
-        str(box[0])
+        str(quad["x1"])
         + " "
-        + str(box[1])
+        + str(quad["y1"])
         + " "
-        + str(box[2])
+        + str(quad["x3"])
         + " "
-        + str(box[3])
+        + str(quad["y3"])
         + "\t"
         + str(width)
         + " "
@@ -53,12 +55,18 @@ def convert(args):
             with open(file_path, "r", encoding="utf8") as f:
                 data = json.load(f)
             image_path = file_path.replace("annotations", "images")
+            image_path = image_path.replace("json", "image", 1)
             image_path = image_path.replace("json", "png")
             file_name = os.path.basename(image_path)
-            image = Image.open(image_path)
+            try:
+                image = Image.open(image_path)
+            except:
+                continue
             width, length = image.size
-            for item in data["form"]:
-                words, label = item["words"], item["label"]
+            for item in data["valid_line"]:
+                # it looks like elements of words in FUNSD are single word,
+                # whereas in CORD it can be multiple words
+                words, label = item["words"], item["category"]
                 words = [w for w in words if w["text"].strip() != ""]
                 if len(words) == 0:
                     continue
@@ -68,13 +76,13 @@ def convert(args):
                         fbw.write(
                             w["text"]
                             + "\t"
-                            + bbox_string(w["box"], width, length)
+                            + bbox_string(w["quad"], width, length)
                             + "\n"
                         )
                         fiw.write(
                             w["text"]
                             + "\t"
-                            + actual_bbox_string(w["box"], width, length)
+                            + actual_bbox_string(w["quad"], width, length)
                             + "\t"
                             + file_name
                             + "\n"
@@ -85,13 +93,13 @@ def convert(args):
                         fbw.write(
                             words[0]["text"]
                             + "\t"
-                            + bbox_string(words[0]["box"], width, length)
+                            + bbox_string(words[0]["quad"], width, length)
                             + "\n"
                         )
                         fiw.write(
                             words[0]["text"]
                             + "\t"
-                            + actual_bbox_string(words[0]["box"], width, length)
+                            + actual_bbox_string(words[0]["quad"], width, length)
                             + "\t"
                             + file_name
                             + "\n"
@@ -101,13 +109,13 @@ def convert(args):
                         fbw.write(
                             words[0]["text"]
                             + "\t"
-                            + bbox_string(words[0]["box"], width, length)
+                            + bbox_string(words[0]["quad"], width, length)
                             + "\n"
                         )
                         fiw.write(
                             words[0]["text"]
                             + "\t"
-                            + actual_bbox_string(words[0]["box"], width, length)
+                            + actual_bbox_string(words[0]["quad"], width, length)
                             + "\t"
                             + file_name
                             + "\n"
@@ -117,13 +125,13 @@ def convert(args):
                             fbw.write(
                                 w["text"]
                                 + "\t"
-                                + bbox_string(w["box"], width, length)
+                                + bbox_string(w["quad"], width, length)
                                 + "\n"
                             )
                             fiw.write(
                                 w["text"]
                                 + "\t"
-                                + actual_bbox_string(w["box"], width, length)
+                                + actual_bbox_string(w["quad"], width, length)
                                 + "\t"
                                 + file_name
                                 + "\n"
@@ -132,13 +140,13 @@ def convert(args):
                         fbw.write(
                             words[-1]["text"]
                             + "\t"
-                            + bbox_string(words[-1]["box"], width, length)
+                            + bbox_string(words[-1]["quad"], width, length)
                             + "\n"
                         )
                         fiw.write(
                             words[-1]["text"]
                             + "\t"
-                            + actual_bbox_string(words[-1]["box"], width, length)
+                            + actual_bbox_string(words[-1]["quad"], width, length)
                             + "\t"
                             + file_name
                             + "\n"
