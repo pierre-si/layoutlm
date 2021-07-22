@@ -9,14 +9,17 @@ from transformers import AutoTokenizer
 
 # should take the min of (x1, x4), the min of (y1, y2), the max of (x3, x2), the max of (y3, y4) 
 def bbox_string(quad, width, length):
+    # example 87 in test is wrongly annotated
+    y1 = min(quad["y1"], quad["y3"])
+    y3 = max(quad["y1"], quad["y3"])
     return (
-        str(int(1000 * (quad["x1"] / width)))
+        str(max(0, int(1000 * (quad["x1"] / width))))
         + " "
-        + str(int(1000 * (quad["y1"] / length)))
+        + str(max(0, int(1000 * (y1 / length))))
         + " "
-        + str(int(1000 * (quad["x3"] / width)))
+        + str(min(1000, int(1000 * (quad["x3"] / width))))
         + " "
-        + str(int(1000 * (quad["y3"] / length)))
+        + str(min(1000, int(1000 * (y3 / length))))
     )
 
 
